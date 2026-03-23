@@ -20,6 +20,23 @@ const userSchema = new mongoose.Schema({
         enum: ['admin', 'faculty', 'learner'],
         default: 'learner',
     },
+    department: {
+        type: String,
+    },
+    designation: {
+        type: String,
+    },
+    staffId: {
+        type: String, // E.g. FAC-1234
+    },
+    assignedFaculty: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
+    isActive: {
+        type: Boolean,
+        default: true,
+    },
 }, {
     timestamps: true,
 });

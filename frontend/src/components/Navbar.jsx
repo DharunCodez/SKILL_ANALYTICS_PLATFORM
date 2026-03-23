@@ -40,7 +40,7 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="bg-gray-800 p-4 text-white shadow-md relative z-50">
+        <nav className="bg-gray-900/50 backdrop-blur-xl border-b border-white/10 p-4 text-white shadow-lg relative z-50">
             <div className="container mx-auto flex justify-between items-center">
                 <Link to="/" className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
                     SkillVerify
@@ -64,19 +64,19 @@ const Navbar = () => {
                                 </button>
 
                                 {showNotifications && (
-                                    <div className="absolute right-0 mt-3 w-80 bg-gray-800 border border-gray-700 rounded-lg shadow-2xl overflow-hidden z-50">
-                                        <div className="p-3 border-b border-gray-700 bg-gray-900 font-semibold flex justify-between items-center">
+                                    <div className="absolute right-0 mt-3 w-80 bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden z-50">
+                                        <div className="p-3 border-b border-white/10 bg-white/5 font-semibold flex justify-between items-center">
                                             <span>Notifications</span>
-                                            <span className="text-xs text-gray-500 cursor-pointer hover:text-white" onClick={fetchNotifications}>Refresh</span>
+                                            <span className="text-xs text-gray-400 cursor-pointer hover:text-white transition-colors" onClick={fetchNotifications}>Refresh</span>
                                         </div>
                                         <div className="max-h-64 overflow-y-auto">
                                             {notifications.length > 0 ? (
                                                 notifications.map(n => (
                                                     <div
                                                         key={n._id}
-                                                        className={`p-3 border-b border-gray-700 hover:bg-gray-700 transition ${n.isRead ? 'opacity-50' : 'bg-gray-700/30'}`}
+                                                        className={`p-3 border-b border-white/5 hover:bg-white/5 transition ${n.isRead ? 'opacity-50' : 'bg-cyan-500/10'}`}
                                                     >
-                                                        <p className="text-sm">{n.message}</p>
+                                                        <p className="text-sm text-slate-200">{n.message}</p>
                                                         {!n.isRead && (
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); markRead(n._id); }}

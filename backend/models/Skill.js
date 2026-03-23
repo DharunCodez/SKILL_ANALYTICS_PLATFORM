@@ -14,13 +14,22 @@ const skillSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    level: {
+    yearsOfExperience: {
         type: Number,
-        required: true,
+        default: 0,
     },
     score: {
         type: Number,
         required: true,
+        min: 0,
+        max: 100,
+    },
+    certifications: [{
+        type: String,
+    }],
+    verified: {
+        type: Boolean,
+        default: false,
     },
     date: {
         type: Date,

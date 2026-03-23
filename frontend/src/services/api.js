@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'http://127.0.0.1:5000/api';
 
 // Create axios instance
 const api = axios.create({
@@ -32,5 +32,13 @@ export const updateUserRole = (id, role) => api.put(`/users/${id}/role`, { role 
 
 export const getNotifications = () => api.get('/notifications');
 export const markNotificationRead = (id) => api.put(`/notifications/${id}`);
+
+export const assignFaculty = (staffId) => api.post('/auth/assign-faculty', { staffId });
+export const getFacultyStudents = () => api.get('/auth/faculty-students');
+export const getMyFaculty = () => api.get('/auth/my-faculty');
+export const getRank = () => api.get('/auth/rank');
+
+export const getMessages = (userId) => api.get(`/messages/${userId}`);
+export const sendMessage = (receiverId, text) => api.post('/messages', { receiverId, text });
 
 export default api;

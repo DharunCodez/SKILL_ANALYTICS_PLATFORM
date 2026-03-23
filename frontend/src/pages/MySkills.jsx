@@ -17,8 +17,7 @@ import {
     RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend
 } from 'recharts';
 
-const levelLabels = ['', 'Novice', 'Elementary', 'Intermediate', 'Advanced', 'Master'];
-const levelEmojis = ['', '🌱', '📖', '⚡', '🔥', '👑'];
+// removed level constants
 
 const MySkills = () => {
     const { user } = useAuth();
@@ -28,7 +27,7 @@ const MySkills = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('All');
     const [editingId, setEditingId] = useState(null);
-    const [editData, setEditData] = useState({ name: '', category: '', level: 1, score: 0 });
+    const [editData, setEditData] = useState({ name: '', category: '', yearsOfExperience: 0, score: 0 });
     const [sortBy, setSortBy] = useState('name');
 
     useEffect(() => {
@@ -59,7 +58,7 @@ const MySkills = () => {
 
     const handleEditStart = (skill) => {
         setEditingId(skill._id);
-        setEditData({ name: skill.name, category: skill.category, level: skill.level, score: skill.score });
+        setEditData({ name: skill.name, category: skill.category, yearsOfExperience: skill.yearsOfExperience || 0, score: skill.score });
     };
 
     const handleEditSave = async (id) => {
@@ -86,7 +85,7 @@ const MySkills = () => {
         .sort((a, b) => {
             if (sortBy === 'name') return a.name.localeCompare(b.name);
             if (sortBy === 'score') return b.score - a.score;
-            if (sortBy === 'level') return b.level - a.level;
+            if (sortBy === 'yearsOfExperience') return (b.yearsOfExperience || 0) - (a.yearsOfExperience || 0);
             return 0;
         });
 
@@ -132,10 +131,13 @@ const MySkills = () => {
     }
 
     return (
-        <div className="flex h-screen bg-slate-900 text-slate-100 overflow-hidden font-sans">
+        <div className="flex h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-slate-100 overflow-hidden font-sans relative">
+            {/* Background Decorations */}
+            <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-cyan-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none"></div>
             <Sidebar />
-            <div className="flex-1 flex flex-col md:ml-64 transition-all duration-300">
-                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-slate-900 p-6 md:p-12">
+            <div className="flex-1 flex flex-col md:ml-64 transition-all duration-300 relative z-10">
+                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-transparent p-6 md:p-12">
 
                     {/* Header */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -155,20 +157,20 @@ const MySkills = () => {
 
                     {/* Stats Row */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                        <div className="bg-slate-800/50 backdrop-blur-md p-5 rounded-2xl border border-slate-700/50">
+                        <div className="bg-white/5 backdrop-blur-xl p-5 rounded-2xl border border-white/10 shadow-xl hover:-translate-y-1 transition-all">
                             <p className="text-slate-400 text-sm mb-1">Total Skills</p>
                             <p className="text-2xl font-bold text-white">{skills.length}</p>
                         </div>
-                        <div className="bg-slate-800/50 backdrop-blur-md p-5 rounded-2xl border border-slate-700/50">
+                        <div className="bg-white/5 backdrop-blur-xl p-5 rounded-2xl border border-white/10 shadow-xl hover:-translate-y-1 transition-all">
                             <p className="text-slate-400 text-sm mb-1">Average Score</p>
                             <p className={`text-2xl font-bold ${getScoreColor(avgScore)}`}>{avgScore}%</p>
                         </div>
-                        <div className="bg-slate-800/50 backdrop-blur-md p-5 rounded-2xl border border-slate-700/50">
+                        <div className="bg-white/5 backdrop-blur-xl p-5 rounded-2xl border border-white/10 shadow-xl hover:-translate-y-1 transition-all">
                             <p className="text-slate-400 text-sm mb-1">Strongest Skill</p>
                             <p className="text-lg font-bold text-emerald-400 truncate">{highestSkill?.name || '—'}</p>
                             <p className="text-xs text-slate-500">{highestSkill ? `${highestSkill.score}%` : ''}</p>
                         </div>
-                        <div className="bg-slate-800/50 backdrop-blur-md p-5 rounded-2xl border border-slate-700/50">
+                        <div className="bg-white/5 backdrop-blur-xl p-5 rounded-2xl border border-white/10 shadow-xl hover:-translate-y-1 transition-all">
                             <p className="text-slate-400 text-sm mb-1">Needs Improvement</p>
                             <p className="text-lg font-bold text-red-400 truncate">{lowestSkill?.name || '—'}</p>
                             <p className="text-xs text-slate-500">{lowestSkill ? `${lowestSkill.score}%` : ''}</p>
@@ -179,7 +181,7 @@ const MySkills = () => {
                     {skills.length > 0 && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                             {/* Skill Gap Analysis */}
-                            <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50 shadow-xl">
+                            <div className="bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-white/10 shadow-2xl hover:border-white/20 transition-all">
                                 <h2 className="text-lg font-bold mb-4 text-white flex items-center gap-2">
                                     <span className="w-2 h-5 bg-cyan-500 rounded-full"></span>
                                     Skill Gap Analysis
@@ -204,7 +206,7 @@ const MySkills = () => {
                             </div>
 
                             {/* Radar */}
-                            <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50 shadow-xl">
+                            <div className="bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-white/10 shadow-2xl hover:border-white/20 transition-all">
                                 <h2 className="text-lg font-bold mb-4 text-white flex items-center gap-2">
                                     <span className="w-2 h-5 bg-purple-500 rounded-full"></span>
                                     Skill Balance Overview
@@ -229,14 +231,14 @@ const MySkills = () => {
                     )}
 
                     {/* Search, Filter & Sort Bar */}
-                    <div className="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50 mb-6 flex flex-col md:flex-row gap-4">
+                    <div className="bg-white/5 backdrop-blur-xl p-4 rounded-2xl border border-white/10 mb-6 flex flex-col md:flex-row gap-4 shadow-xl">
                         {/* Search */}
                         <div className="flex-1 relative">
                             <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-3 text-slate-500" />
                             <input
                                 type="text"
                                 placeholder="Search skills..."
-                                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-sm"
+                                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black/20 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-sm font-light placeholder:text-slate-400"
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
                             />
@@ -263,13 +265,13 @@ const MySkills = () => {
 
                         {/* Sort */}
                         <select
-                            className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 text-sm focus:outline-none"
+                            className="px-4 py-2 rounded-xl bg-black/20 border border-white/10 text-slate-300 text-sm focus:outline-none font-light"
                             value={sortBy}
                             onChange={e => setSortBy(e.target.value)}
                         >
                             <option value="name">Sort by Name</option>
                             <option value="score">Sort by Score</option>
-                            <option value="level">Sort by Level</option>
+                            <option value="yearsOfExperience">Sort by Experience</option>
                         </select>
                     </div>
 
@@ -279,7 +281,7 @@ const MySkills = () => {
                             {filteredSkills.map(skill => (
                                 <div
                                     key={skill._id}
-                                    className="bg-slate-800/60 rounded-2xl border border-slate-700/50 hover:border-cyan-500/30 transition-all group overflow-hidden"
+                                    className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 hover:border-cyan-500/50 transition-all group overflow-hidden shadow-2xl hover:-translate-y-1"
                                 >
                                     {/* Score bar at top */}
                                     <div className="h-1.5 bg-slate-700">
@@ -319,22 +321,13 @@ const MySkills = () => {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="text-xs text-slate-500">Level</label>
-                                                    <div className="flex gap-1 mt-1">
-                                                        {[1, 2, 3, 4, 5].map(l => (
-                                                            <button
-                                                                key={l}
-                                                                type="button"
-                                                                onClick={() => setEditData({ ...editData, level: l })}
-                                                                className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${editData.level === l
-                                                                    ? 'bg-cyan-500 text-white'
-                                                                    : 'bg-slate-700 text-slate-400'
-                                                                    }`}
-                                                            >
-                                                                {l}
-                                                            </button>
-                                                        ))}
-                                                    </div>
+                                                    <label className="text-xs text-slate-500">Years of Experience</label>
+                                                    <input
+                                                        type="number" min="0" max="50"
+                                                        className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 mt-1"
+                                                        value={editData.yearsOfExperience}
+                                                        onChange={e => setEditData({ ...editData, yearsOfExperience: Number(e.target.value) })}
+                                                    />
                                                 </div>
                                                 <div className="flex gap-2 pt-1">
                                                     <button
@@ -376,23 +369,14 @@ const MySkills = () => {
                                                     ></div>
                                                 </div>
 
-                                                {/* Level */}
-                                                <div className="flex items-center justify-between mb-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-lg">{levelEmojis[skill.level]}</span>
+                                                {/* Years of Experience */}
+                                                <div className="flex items-center justify-between mb-4 mt-2">
+                                                    <div className="flex items-center gap-2 bg-slate-900/50 px-3 py-2 rounded-lg border border-slate-700/50">
+                                                        <span className="text-lg">📅</span>
                                                         <div>
-                                                            <p className="text-sm font-medium text-slate-300">{levelLabels[skill.level]}</p>
-                                                            <p className="text-[10px] text-slate-500">Level {skill.level} of 5</p>
+                                                            <p className="text-sm font-bold text-cyan-400">{skill.yearsOfExperience || 0} Years</p>
+                                                            <p className="text-[10px] text-slate-500 uppercase tracking-wider">Experience</p>
                                                         </div>
-                                                    </div>
-                                                    <div className="flex gap-0.5">
-                                                        {[1, 2, 3, 4, 5].map(i => (
-                                                            <div
-                                                                key={i}
-                                                                className={`w-2 h-4 rounded-sm ${i <= skill.level ? getScoreBg(skill.score) : 'bg-slate-700'
-                                                                    }`}
-                                                            ></div>
-                                                        ))}
                                                     </div>
                                                 </div>
 
@@ -426,7 +410,7 @@ const MySkills = () => {
                             ))}
                         </div>
                     ) : (
-                        <div className="bg-slate-800/50 p-12 rounded-2xl border border-slate-700/50 text-center">
+                        <div className="bg-white/5 backdrop-blur-xl p-12 rounded-2xl border border-white/10 text-center shadow-2xl">
                             <ChartBarIcon className="w-16 h-16 text-slate-600 mx-auto mb-4" />
                             <h3 className="text-xl font-bold text-slate-400 mb-2">No skills found</h3>
                             <p className="text-slate-500">

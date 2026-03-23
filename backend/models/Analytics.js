@@ -6,9 +6,21 @@ const analyticsSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    totalSkills: {
+        type: Number,
+        default: 0,
+    },
+    verifiedSkills: {
+        type: Number,
+        default: 0,
+    },
+    averageScore: {
+        type: Number,
+        default: 0,
+    },
     skillGrowth: {
         type: Number,
-        required: true,
+        default: 0,
     },
     coursesCompleted: {
         type: Number,

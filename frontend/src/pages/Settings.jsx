@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import useAuth from '../hooks/useAuth';
+import * as api from '../services/api';
 import {
     UserCircleIcon,
     BellIcon,
@@ -12,7 +13,8 @@ import {
 } from '@heroicons/react/24/outline';
 
 const Settings = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, updateUser } = useAuth();
+    const [staffIdInput, setStaffIdInput] = useState('');
 
     const [activeTab, setActiveTab] = useState('profile');
     const [success, setSuccess] = useState('');
@@ -58,14 +60,34 @@ const Settings = () => {
         setTimeout(() => { setSuccess(''); setError(''); }, 3000);
     };
 
-    const handleProfileSave = () => {
-        // Update localStorage
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        if (userInfo) {
-            userInfo.name = profile.name;
-            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+    const handleProfileSave = async () => {
+        let errorOccurred = false;
+        
+        // Handle Faculty Assignment internally if provided
+        if (user?.role === 'learner' && staffIdInput.trim()) {
+            try {
+                const { data } = await api.assignFaculty(staffIdInput.trim());
+                updateUser(data); // Immediate sync
+                showMessage('success', 'Successfully linked to your Faculty!');
+                setStaffIdInput('');
+            } catch (err) {
+                showMessage('error', err.response?.data?.message || 'Invalid Staff ID. Verification Failed.');
+                errorOccurred = true;
+            }
         }
-        showMessage('success', 'Profile updated successfully!');
+        
+        if (!errorOccurred && !staffIdInput.trim()) {
+            showMessage('success', 'Profile updated successfully!');
+        }
+
+        // Update localStorage for simple name change if no faculty assignment was done
+        if (!staffIdInput.trim()) {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            if (userInfo) {
+                userInfo.name = profile.name;
+                updateUser(userInfo);
+            }
+        }
     };
 
     const handleNotifSave = () => {
@@ -222,11 +244,44 @@ const Settings = () => {
 
                                         <div>
                                             <label className="block text-sm text-slate-400 mb-1.5">Role</label>
-                                            <div className="px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 capitalize">
-                                                {profile.role}
-                                                <span className="text-xs text-slate-600 ml-2">(assigned by admin)</span>
+                                            <div className="px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 capitalize flex justify-between items-center">
+                                                <span>{profile.role}</span>
+                                                <span className="text-xs text-slate-600">(assigned by admin)</span>
                                             </div>
                                         </div>
+
+                                        {/* Faculty Settings */}
+                                        {profile.role === 'faculty' && (
+                                            <div>
+                                                <label className="block text-sm text-cyan-400 mb-1.5 font-bold">Your Unique Staff ID</label>
+                                                <div className="px-4 py-3 rounded-xl bg-cyan-900/20 border border-cyan-500/50 text-cyan-300 font-mono tracking-wider flex justify-between items-center">
+                                                    {user?.staffId || "Not assigned yet"}
+                                                    <span className="text-[10px] text-cyan-500 uppercase tracking-widest">Share with students</span>
+                                                </div>
+                                                <p className="text-xs text-slate-500 mt-2">Students must enter this exact ID to join your class list.</p>
+                                            </div>
+                                        )}
+                                        {profile.role === 'learner' && (
+                                            <div>
+                                                <label className="block text-sm text-cyan-400 mb-1.5 font-bold">Connect to Faculty</label>
+                                                {user?.assignedFaculty ? (
+                                                    <div className="px-4 py-3 rounded-xl bg-emerald-900/20 border border-emerald-500/50 text-emerald-400 font-medium">
+                                                        ✓ You are currently assigned to a Faculty member.
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Enter 8-digit Faculty Staff ID (e.g. FAC-XXXX-YYYY)"
+                                                            className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all placeholder:text-slate-600 font-mono"
+                                                            value={staffIdInput}
+                                                            onChange={e => setStaffIdInput(e.target.value.toUpperCase())}
+                                                        />
+                                                        <p className="text-xs text-slate-500 mt-2">Entering this will link your skills and progress to your designated faculty.</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
 
                                         <button
                                             onClick={handleProfileSave}

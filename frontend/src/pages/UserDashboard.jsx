@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import * as api from '../services/api';
 import useAuth from '../hooks/useAuth';
+import ChatModal from '../components/ChatModal';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
     LineChart, Line
@@ -17,14 +19,40 @@ import {
 
 const UserDashboard = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [skills, setSkills] = useState([]);
-    const [newSkill, setNewSkill] = useState({ name: '', category: 'Technical', level: 1, score: 0 });
+    const [newSkill, setNewSkill] = useState({ name: '', category: 'Technical', yearsOfExperience: 0, score: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [facultyObj, setFacultyObj] = useState(null);
+    const [rankInfo, setRankInfo] = useState({ rank: '...', totalStudents: '...' });
+    const [isChatOpen, setIsChatOpen] = useState(false);
 
     useEffect(() => {
         fetchSkills();
-    }, []);
+        if (user?.assignedFaculty && user.role === 'learner') {
+            fetchFacultyDetails();
+            fetchRank();
+        }
+    }, [user]);
+
+    const fetchFacultyDetails = async () => {
+        try {
+            const { data } = await api.getMyFaculty();
+            if (data) setFacultyObj(data);
+        } catch (err) {
+            console.error("Failed to fetch assigned faculty details", err);
+        }
+    };
+
+    const fetchRank = async () => {
+        try {
+            const { data } = await api.getRank();
+            setRankInfo(data);
+        } catch (err) {
+            console.error("Failed to fetch rank", err);
+        }
+    };
 
     const fetchSkills = async () => {
         try {
@@ -45,7 +73,7 @@ const UserDashboard = () => {
         try {
             const { data } = await api.createSkill(newSkill);
             setSkills([...skills, data]);
-            setNewSkill({ name: '', category: 'Technical', level: 1, score: 0 });
+            setNewSkill({ name: '', category: 'Technical', yearsOfExperience: 0, score: 0 });
         } catch (err) {
             const message = err.response?.data?.message || 'Failed to add skill';
             setError(message);
@@ -90,13 +118,17 @@ const UserDashboard = () => {
     };
 
     return (
-        <div className="flex h-screen bg-slate-900 text-slate-100 overflow-hidden font-sans">
+        <div className="flex h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-slate-100 overflow-hidden font-sans relative">
+            {/* Background Decorations */}
+            <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-cyan-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+
             <Sidebar />
 
-            <div className="flex-1 flex flex-col md:ml-64 transition-all duration-300">
+            <div className="flex-1 flex flex-col md:ml-64 transition-all duration-300 relative z-10">
                 {/* Mobile Navbar could go here if needed, keeping simple for now */}
 
-                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-slate-900 p-6 md:p-12">
+                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-transparent p-6 md:p-12">
                     {/* Header */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                         <div>
@@ -107,7 +139,7 @@ const UserDashboard = () => {
                         </div>
                         <button
                             onClick={() => window.print()}
-                            className="bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-cyan-900/20"
+                            className="bg-white/5 backdrop-blur-md hover:bg-white/10 text-cyan-400 border border-white/10 px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-lg hover:shadow-cyan-500/20"
                         >
                             <DocumentArrowDownIcon className="w-5 h-5" />
                             <span>Download Report</span>
@@ -122,7 +154,7 @@ const UserDashboard = () => {
 
                     {/* Stats Overview Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div className="bg-slate-800/50 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-cyan-500/30 transition-all group">
+                        <div className="bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-white/10 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(6,182,212,0.2)] shadow-xl transition-all group transform hover:-translate-y-1">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-slate-400 font-medium">Total Skills</h3>
                                 <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition-colors">
@@ -130,10 +162,10 @@ const UserDashboard = () => {
                                 </div>
                             </div>
                             <p className="text-3xl font-bold text-white">{skills.length}</p>
-                            <p className="text-xs text-slate-500 mt-2">+2 this month</p>
+                            <p className="text-xs text-slate-400 mt-2">+2 this month</p>
                         </div>
 
-                        <div className="bg-slate-800/50 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-purple-500/30 transition-all group">
+                        <div className="bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-white/10 hover:border-purple-500/50 hover:shadow-[0_0_15px_rgba(168,85,247,0.2)] shadow-xl transition-all group transform hover:-translate-y-1">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-slate-400 font-medium">Avg Score</h3>
                                 <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-colors">
@@ -143,10 +175,16 @@ const UserDashboard = () => {
                             <p className="text-3xl font-bold text-white">
                                 {skills.length > 0 ? (skills.reduce((acc, curr) => acc + curr.score, 0) / skills.length).toFixed(1) : 0}%
                             </p>
-                            <p className="text-xs text-slate-500 mt-2">Top 15% of peers</p>
+                            <p className="text-xs text-slate-400 mt-2">
+                                {rankInfo.rank !== 'N/A' ? (
+                                    <>Rank <span className="text-purple-400 font-bold">#{rankInfo.rank}</span> in class of {rankInfo.totalStudents}</>
+                                ) : (
+                                    <>Top 15% of peers</>
+                                )}
+                            </p>
                         </div>
 
-                        <div className="bg-slate-800/50 backdrop-blur-md p-6 rounded-2xl border border-slate-700/50 hover:border-emerald-500/30 transition-all group">
+                        <div className="bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-white/10 hover:border-emerald-500/50 hover:shadow-[0_0_15px_rgba(16,185,129,0.2)] shadow-xl transition-all group transform hover:-translate-y-1">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-slate-400 font-medium">Pending Actions</h3>
                                 <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
@@ -154,14 +192,14 @@ const UserDashboard = () => {
                                 </div>
                             </div>
                             <p className="text-3xl font-bold text-white">{getRecommendations().length}</p>
-                            <p className="text-xs text-slate-500 mt-2">Recommended courses</p>
+                            <p className="text-xs text-slate-400 mt-2">Recommended courses</p>
                         </div>
                     </div>
 
                     {/* Main Charts Area */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                         {/* Skill Proficiency Bar Chart */}
-                        <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50 shadow-xl">
+                        <div className="bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-white/10 shadow-2xl hover:border-white/20 transition-all">
                             <h2 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
                                 <span className="w-2 h-6 bg-cyan-500 rounded-full"></span>
                                 Skill Proficiency
@@ -184,7 +222,7 @@ const UserDashboard = () => {
                         </div>
 
                         {/* Skill Gap Radar Chart */}
-                        <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50 shadow-xl">
+                        <div className="bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-white/10 shadow-2xl hover:border-white/20 transition-all">
                             <h2 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
                                 <span className="w-2 h-6 bg-purple-500 rounded-full"></span>
                                 Skill Balance
@@ -210,18 +248,38 @@ const UserDashboard = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                         {/* Add Skill Form */}
-                        <div className="lg:col-span-1 bg-slate-800/80 p-6 rounded-2xl border border-slate-700/50 shadow-xl h-fit">
+                        <div className="lg:col-span-1 bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-white/10 shadow-2xl h-fit">
                             <h2 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
                                 <span className="w-2 h-6 bg-emerald-500 rounded-full"></span>
                                 Add New Skill
                             </h2>
+                            
+                            {/* Skill Evaluation Call-To-Action */}
+                            <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20 rounded-xl p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-400">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-bold text-white">Not sure about your score?</h3>
+                                        <p className="text-xs text-slate-400">Take a rapid test to evaluate your skill.</p>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={() => navigate('/assessment')}
+                                    className="shrink-0 px-4 py-2 bg-slate-800 hover:bg-emerald-600 border border-emerald-500/30 text-white rounded-lg text-xs font-bold transition-all shadow-lg hover:shadow-emerald-500/20"
+                                >
+                                    Take Assessment
+                                </button>
+                            </div>
+
                             <form onSubmit={handleAddSkill} className="space-y-4">
                                 <div>
                                     <label className="block text-sm text-slate-400 mb-1">Skill Name</label>
                                     <input
                                         type="text"
                                         placeholder="e.g. Node.js"
-                                        className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
+                                        className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/10 font-light text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
                                         value={newSkill.name}
                                         onChange={e => setNewSkill({ ...newSkill, name: e.target.value })}
                                         required
@@ -232,7 +290,7 @@ const UserDashboard = () => {
                                     <label className="block text-sm text-slate-400 mb-1">Category</label>
                                     <div className="relative">
                                         <select
-                                            className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 appearance-none"
+                                            className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/10 font-light text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 appearance-none"
                                             value={newSkill.category}
                                             onChange={e => setNewSkill({ ...newSkill, category: e.target.value })}
                                         >
@@ -291,35 +349,21 @@ const UserDashboard = () => {
                                     </div>
                                 </div>
 
-                                {/* Experience Level - Button Group */}
+                                {/* Years Of Experience - Number Input */}
                                 <div>
                                     <label className="block text-sm text-slate-400 mb-2">
-                                        Experience Level
+                                        Years of Experience
                                         <span className="text-slate-500 ml-1">— How long have you practiced this?</span>
                                     </label>
-                                    <div className="grid grid-cols-5 gap-1.5">
-                                        {[
-                                            { val: 1, label: 'Novice', icon: '🌱', desc: '< 6 months' },
-                                            { val: 2, label: 'Elementary', icon: '📖', desc: '6–12 months' },
-                                            { val: 3, label: 'Intermediate', icon: '⚡', desc: '1–2 years' },
-                                            { val: 4, label: 'Advanced', icon: '🔥', desc: '2–4 years' },
-                                            { val: 5, label: 'Master', icon: '👑', desc: '4+ years' },
-                                        ].map(lvl => (
-                                            <button
-                                                key={lvl.val}
-                                                type="button"
-                                                onClick={() => setNewSkill({ ...newSkill, level: lvl.val })}
-                                                className={`flex flex-col items-center p-2 rounded-xl border text-center transition-all ${newSkill.level === lvl.val
-                                                    ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-lg shadow-emerald-900/20 scale-105'
-                                                    : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-300'
-                                                    }`}
-                                            >
-                                                <span className="text-lg">{lvl.icon}</span>
-                                                <span className="text-[10px] font-semibold mt-0.5 leading-tight">{lvl.label}</span>
-                                                <span className="text-[9px] text-slate-500 leading-tight">{lvl.desc}</span>
-                                            </button>
-                                        ))}
-                                    </div>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="50"
+                                        className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/10 font-light text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
+                                        value={newSkill.yearsOfExperience}
+                                        onChange={e => setNewSkill({ ...newSkill, yearsOfExperience: Number(e.target.value) })}
+                                        required
+                                    />
                                 </div>
 
                                 <button
@@ -385,7 +429,7 @@ const UserDashboard = () => {
                                             <tr className="text-slate-400 border-b border-slate-700/50 text-sm uppercase tracking-wider">
                                                 <th className="p-4 font-medium">Name</th>
                                                 <th className="p-4 font-medium">Category</th>
-                                                <th className="p-4 font-medium">Level</th>
+                                                <th className="p-4 font-medium">YOE</th>
                                                 <th className="p-4 font-medium">Score</th>
                                                 <th className="p-4 font-medium text-right">Action</th>
                                             </tr>
@@ -399,7 +443,7 @@ const UserDashboard = () => {
                                                             {skill.category}
                                                         </span>
                                                     </td>
-                                                    <td className="p-4">{skill.level}</td>
+                                                    <td className="p-4">{skill.yearsOfExperience || 0} Yrs</td>
                                                     <td className="p-4">
                                                         <div className="w-full max-w-[150px] bg-slate-700 rounded-full h-2">
                                                             <div
@@ -431,6 +475,30 @@ const UserDashboard = () => {
                     </div>
                 </main>
             </div>
+
+            {/* Chat with Faculty Floating Action Button */}
+            {facultyObj && (
+                <>
+                    <button 
+                        onClick={() => setIsChatOpen(true)}
+                        className="fixed bottom-8 right-8 z-[60] bg-cyan-600 hover:bg-cyan-500 text-white p-4 rounded-full shadow-2xl hover:shadow-cyan-500/50 transition-all group flex items-center gap-3"
+                    >
+                        <div className="relative">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                        </div>
+                        <span className="font-bold hidden group-hover:block whitespace-nowrap overflow-hidden">
+                            Message {facultyObj.name}
+                        </span>
+                    </button>
+
+                    <ChatModal 
+                        isOpen={isChatOpen} 
+                        onClose={() => setIsChatOpen(false)} 
+                        otherUser={facultyObj} 
+                        currentUser={user} 
+                    />
+                </>
+            )}
         </div>
     );
 };

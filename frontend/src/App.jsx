@@ -9,6 +9,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import FacultyDashboard from './pages/FacultyDashboard';
 import MySkills from './pages/MySkills';
 import Settings from './pages/Settings';
+import SkillAssessment from './pages/SkillAssessment';
+import Messages from './pages/Messages';
 
 function App() {
     return (
@@ -36,10 +38,26 @@ function App() {
                         }
                     />
                     <Route
+                        path="/messages"
+                        element={
+                            <ProtectedRoute allowedRoles={['learner']}>
+                                <Messages />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
                         path="/settings"
                         element={
                             <ProtectedRoute allowedRoles={['learner', 'faculty', 'admin']}>
                                 <Settings />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/assessment"
+                        element={
+                            <ProtectedRoute allowedRoles={['learner', 'faculty', 'admin']}>
+                                <SkillAssessment />
                             </ProtectedRoute>
                         }
                     />
