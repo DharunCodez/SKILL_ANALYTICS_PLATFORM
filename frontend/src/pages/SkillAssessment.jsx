@@ -19,6 +19,7 @@ const SkillAssessment = () => {
     const [scoreReceived, setScoreReceived] = useState('');
     const [scoreTotal, setScoreTotal] = useState('');
     const [yearsOfExperience, setYearsOfExperience] = useState('');
+    const [testWebsiteName, setTestWebsiteName] = useState('');
     
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [result, setResult] = useState(null);
@@ -32,8 +33,8 @@ const SkillAssessment = () => {
     };
 
     const evaluateTest = async () => {
-        if (!scoreReceived || !scoreTotal || Number(scoreTotal) <= 0 || yearsOfExperience === '') {
-            alert("Please enter valid scores and your years of experience.");
+        if (!scoreReceived || !scoreTotal || Number(scoreTotal) <= 0 || yearsOfExperience === '' || !testWebsiteName.trim()) {
+            alert("Please enter valid scores, your years of experience, and the test website name.");
             return;
         }
 
@@ -57,7 +58,8 @@ const SkillAssessment = () => {
                 name: skillName,
                 category,
                 score: rawScore,
-                yearsOfExperience: yoe
+                yearsOfExperience: yoe,
+                testWebsite: testWebsiteName
             });
             setResult(finalResult);
             setStep(3);
@@ -219,10 +221,21 @@ const SkillAssessment = () => {
                                 className="w-full px-5 py-4 rounded-xl bg-slate-900/60 border border-slate-700/50 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all text-center text-xl font-bold"
                             />
                         </div>
+
+                        <div>
+                            <label className="text-xs text-slate-400 font-bold uppercase tracking-wider ml-1 mb-2 block">Test Website Name</label>
+                            <input 
+                                type="text"
+                                value={testWebsiteName}
+                                onChange={(e) => setTestWebsiteName(e.target.value)}
+                                placeholder="e.g. Coursera, Udemy, HackerRank"
+                                className="w-full px-5 py-4 rounded-xl bg-slate-900/60 border border-slate-700/50 text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all text-center text-xl font-bold"
+                            />
+                        </div>
                         
                         <button 
                             onClick={evaluateTest}
-                            disabled={!scoreReceived || !scoreTotal || yearsOfExperience === '' || isSubmitting}
+                            disabled={!scoreReceived || !scoreTotal || yearsOfExperience === '' || !testWebsiteName.trim() || isSubmitting}
                             className="w-full mt-6 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-emerald-500/30 disabled:opacity-50 flex items-center justify-center gap-2 text-lg"
                         >
                             {isSubmitting ? 'Saving Assessment...' : 'Evaluate & Save Skill'}

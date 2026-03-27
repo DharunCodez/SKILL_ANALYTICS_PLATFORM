@@ -14,7 +14,7 @@ const getSkills = asyncHandler(async (req, res) => {
 // @route   POST /api/skills
 // @access  Private
 const setSkill = asyncHandler(async (req, res) => {
-    const { name, category, yearsOfExperience, score } = req.body;
+    const { name, category, yearsOfExperience, score, testWebsite } = req.body;
 
     if (!name || score === undefined || score === null) {
         res.status(400);
@@ -37,6 +37,7 @@ const setSkill = asyncHandler(async (req, res) => {
         category: category || 'Technical',
         yearsOfExperience: yearsOfExperience || 0,
         score,
+        testWebsite: testWebsite || '',
         user: req.user.id,
     });
 

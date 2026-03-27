@@ -24,6 +24,10 @@ const skillSchema = new mongoose.Schema({
         min: 0,
         max: 100,
     },
+    testWebsite: {
+        type: String,
+        default: '',
+    },
     certifications: [{
         type: String,
     }],
