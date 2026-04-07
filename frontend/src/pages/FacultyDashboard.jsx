@@ -24,6 +24,10 @@ export default function FacultyDashboard() {
             }
         };
         fetchStudents();
+        
+        // Update lively every 3 seconds
+        const intervalId = setInterval(fetchStudents, 3000);
+        return () => clearInterval(intervalId);
     }, []);
 
     if (loading) return <div className="text-white text-center mt-20">Loading...</div>;

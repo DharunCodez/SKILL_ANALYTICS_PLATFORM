@@ -94,6 +94,13 @@ const assignFaculty = asyncHandler(async (req, res) => {
         throw new Error('Invalid Staff ID. Verification failed.');
     }
     
+    // Check if the faculty already has 10 students
+    const studentCount = await User.countDocuments({ assignedFaculty: faculty._id });
+    if (studentCount >= 10 && req.user.assignedFaculty?.toString() !== faculty._id.toString()) {
+        res.status(400);
+        throw new Error('This faculty member has reached the maximum limit of 10 students.');
+    }
+    
     req.user.assignedFaculty = faculty._id;
     await req.user.save();
     

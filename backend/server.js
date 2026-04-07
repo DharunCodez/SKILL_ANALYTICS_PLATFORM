@@ -1,4 +1,5 @@
 const express = require('express');
+const http = require('http');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -40,4 +41,15 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+const server = http.createServer(app);
+
+server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use. Please stop the process using it or set a different PORT in .env.`);
+    } else {
+        console.error(error);
+    }
+    process.exit(1);
+});
+
+server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
