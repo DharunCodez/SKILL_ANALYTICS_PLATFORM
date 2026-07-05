@@ -3,6 +3,8 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -17,7 +19,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            const { data } = await axios.post('http://127.0.0.1:5001/api/auth/login', {
+            const { data } = await axios.post(`${BACKEND_URL}/api/auth/login`, {
                 email,
                 password,
             });
@@ -31,7 +33,7 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (name, email, password, role) => {
         try {
-            const { data } = await axios.post('http://127.0.0.1:5001/api/auth/register', {
+            const { data } = await axios.post(`${BACKEND_URL}/api/auth/register`, {
                 name,
                 email,
                 password,

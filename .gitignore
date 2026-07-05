@@ -13,9 +13,11 @@ build/
 # Environment Variables
 .env
 .env.local
+.env.production
 .env.development.local
 .env.test.local
 .env.production.local
+.env.example
 
 # IDEs and Editors
 .vscode/
@@ -35,3 +37,10 @@ yarn-error.log*
 
 # Local Persistent MongoDB
 local-mongo-data/
+
+# Local dev helpers (not needed in deployment)
+backend/scratch/
+backend/npm.cmd
+frontend/npm.cmd
+run.bat
+run.ps1

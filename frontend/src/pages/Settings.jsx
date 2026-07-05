@@ -100,7 +100,7 @@ const Settings = () => {
         showMessage('success', 'Appearance settings saved!');
     };
 
-    const handlePasswordChange = () => {
+    const handlePasswordChange = async () => {
         if (!passwords.current || !passwords.newPassword || !passwords.confirm) {
             showMessage('error', 'Please fill all password fields');
             return;
@@ -113,8 +113,13 @@ const Settings = () => {
             showMessage('error', 'Password must be at least 6 characters');
             return;
         }
-        setPasswords({ current: '', newPassword: '', confirm: '' });
-        showMessage('success', 'Password changed successfully!');
+        try {
+            await api.changePassword(passwords.current, passwords.newPassword);
+            setPasswords({ current: '', newPassword: '', confirm: '' });
+            showMessage('success', 'Password changed successfully!');
+        } catch (err) {
+            showMessage('error', err.response?.data?.message || 'Failed to change password. Please check your current password.');
+        }
     };
 
     const handleDeleteAccount = () => {

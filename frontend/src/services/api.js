@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://127.0.0.1:5001/api';
+const API_URL = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
 // Create axios instance
 const api = axios.create({
@@ -40,5 +40,6 @@ export const getRank = () => api.get('/auth/rank');
 
 export const getMessages = (userId) => api.get(`/messages/${userId}`);
 export const sendMessage = (receiverId, text) => api.post('/messages', { receiverId, text });
+export const changePassword = (currentPassword, newPassword) => api.put('/auth/change-password', { currentPassword, newPassword });
 
 export default api;
