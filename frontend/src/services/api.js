@@ -1,6 +1,12 @@
 import axios from 'axios';
 
-export const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.VITE_BACKEND_URL ? `${import.meta.env.VITE_BACKEND_URL}/api` : 'http://localhost:5001/api');
+const rawUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001/api';
+let cleanUrl = rawUrl.trim().replace(/\/+$/, '');
+if (!cleanUrl.endsWith('/api')) {
+    cleanUrl = `${cleanUrl}/api`;
+}
+
+export const API_URL = cleanUrl;
 
 // Create axios instance
 const api = axios.create({

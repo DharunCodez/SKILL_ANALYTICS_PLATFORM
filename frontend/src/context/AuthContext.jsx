@@ -1,10 +1,8 @@
 import { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_URL } from '../services/api';
+import api, { API_URL } from '../services/api';
 
 export const AuthContext = createContext();
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -20,7 +18,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            const { data } = await axios.post(`${API_URL}/auth/login`, {
+            const { data } = await api.post('/auth/login', {
                 email,
                 password,
             });
@@ -34,7 +32,7 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (name, email, password, role) => {
         try {
-            const { data } = await axios.post(`${API_URL}/auth/register`, {
+            const { data } = await api.post('/auth/register', {
                 name,
                 email,
                 password,
