@@ -31,6 +31,14 @@ const updateUserRole = asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
 
     if (user) {
+        if (req.body.role === 'admin' && user.role !== 'admin') {
+            const existingAdmin = await User.findOne({ role: 'admin' });
+            if (existingAdmin) {
+                res.status(400);
+                throw new Error('Only one Administrator is allowed in the system.');
+            }
+        }
+
         user.role = req.body.role || user.role;
 
         const updatedUser = await user.save();

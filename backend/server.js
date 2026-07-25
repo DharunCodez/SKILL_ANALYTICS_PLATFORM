@@ -1,12 +1,14 @@
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const mongoose = require('mongoose');
 const connectDB = require('./config/db');
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 connectDB();
 
@@ -28,6 +30,16 @@ app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    });
+});
+
 // Define Routes
 const authRoutes = require('./routes/authRoutes');
 const skillRoutes = require('./routes/skillRoutes');
@@ -46,7 +58,18 @@ app.use('/api/messages', messageRoutes); // New usage
 const { errorHandler } = require('./middleware/errorMiddleware');
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+// Global error handlers to prevent server crashes
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    // Don't exit the process, just log the error
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    // Don't exit the process, just log the error
+});
+
+const PORT = process.env.PORT || 5001;
 
 const server = http.createServer(app);
 

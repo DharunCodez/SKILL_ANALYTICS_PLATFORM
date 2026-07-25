@@ -25,6 +25,14 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error('User already exists');
     }
     
+    if (role === 'admin') {
+        const existingAdmin = await User.findOne({ role: 'admin' });
+        if (existingAdmin) {
+            res.status(400);
+            throw new Error('An Administrator account already exists. Public registration for Admin is disabled.');
+        }
+    }
+
     let staffId = undefined;
     if (role === 'faculty') {
         const timestamp = Date.now().toString().slice(-4);
@@ -32,11 +40,13 @@ const registerUser = asyncHandler(async (req, res) => {
         staffId = `FAC-${timestamp}-${randomStr}`;
     }
 
+    const userRole = ['admin', 'faculty', 'learner'].includes(role) ? role : 'learner';
+
     const user = await User.create({
         name,
         email,
         password,
-        role,
+        role: userRole,
         staffId,
     });
 
